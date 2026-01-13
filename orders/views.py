@@ -11,6 +11,9 @@ from plans.models import Plan
 from .models import Order, OrderItem
 from .serializers import OrderCreateSerializer, OrderSerializer
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
+
 
 class CreateOrderView(APIView):
     """
@@ -51,6 +54,13 @@ class CreateOrderView(APIView):
         # 3️⃣ Set buffet timing
         started_at = timezone.now()
         expires_at = started_at + timedelta(minutes=plan.duration_minutes)
+
+        # 🚫 Reject if buffet time is already expired (safety check)
+        if timezone.now() > expires_at:
+            return Response(
+                {"error": "Buffet time has expired."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # 4️⃣ Create order
         order = Order.objects.create(
@@ -106,7 +116,10 @@ class CreateOrderView(APIView):
 class StaffOrderListView(APIView):
     """
     List all active (non-closed) orders.
+    Staff-only.
     """
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         orders = Order.objects.exclude(status="closed")
@@ -117,7 +130,10 @@ class StaffOrderListView(APIView):
 class UpdateOrderStatusView(APIView):
     """
     Update order status (staff action).
+    Staff-only.
     """
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def patch(self, request, order_id):
         try:

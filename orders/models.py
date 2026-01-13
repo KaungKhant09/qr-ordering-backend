@@ -27,12 +27,9 @@ class Order(models.Model):
     )
 
     # NEW: buffet plan selected by the customer
-    # Nullable for Phase A to allow safe migration
     plan = models.ForeignKey(
         Plan,
         on_delete=models.PROTECT,
-        null=True,
-        blank=True,
     )
 
     # Current lifecycle state of the order

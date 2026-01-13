@@ -24,6 +24,7 @@ Staff manage and track orders via a separate web interface.
 - Menu items categorized and plan-restricted
 - Backend-enforced ordering rules
 - Buffet time tracking (start & expiry)
+- Automatic order expiry and auto-close
 - Staff order status management
 - Django Admin for internal management
 
@@ -73,12 +74,18 @@ SECRET_KEY=your-secret-key
 DATABASE_URL=postgres://user:password@localhost:5432/db_name
 ```
 
+> Note:  
+> Local development currently uses SQLite by default.  
+> PostgreSQL is used in production (Railway).
+
+---
+
 ### 5. Run Migrations
 ```bash
 python manage.py migrate
 ```
 
-### 6. Create Superuser
+### 6. Create Superuser (Staff Account)
 ```bash
 python manage.py createsuperuser
 ```
@@ -114,24 +121,52 @@ The backend strictly enforces:
 - Buffet plan rules
 - Category access
 - Time limits
+- Order expiry
+
+---
+
+## Authentication & Access Control
+
+This project uses **session-based authentication** for staff access.
+
+### Customer Access (No Login Required)
+
+Customers place orders via QR code.  
+No authentication is required for:
+- `GET /api/menu/{qr_token}/`
+- `POST /api/orders/`
+
+### Staff Access (Login Required)
+
+Staff must log in via Django Admin:
+```
+/admin/
+```
+
+After login, staff can access:
+- `GET /api/staff/orders/`
+- `PATCH /api/staff/orders/{id}/status/`
+
+Unauthenticated access to staff endpoints will return **403 Forbidden**.
 
 ---
 
 ## Development Notes
 
-- Do not manually create database tables  
+- Do **not** manually create database tables  
   → Schema is managed via Django models and migrations
-- Business rules are enforced at the API layer
-- Django Admin bypasses business rules and is for internal use only
+- Business rules are enforced at the **API layer**
+- Django Admin bypasses business rules and is intended for internal use only
 
 ---
 
 ## Out of Scope (MVP)
 
-- Authentication / authorization
+- Customer authentication
 - Payments
 - Order cancellation
-- Real-time updates
+- Real-time updates (WebSockets)
+- Role-based staff permissions (beyond basic staff login)
 
 ---
 

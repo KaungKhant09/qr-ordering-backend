@@ -23,10 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-8!!b_iel#y**y2%jzac)-c6f%!y84qpf&gr=_v4umd3fiok*d0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "qr-ordering-backend-production.up.railway.app",
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://qr-ordering-backend-production.up.railway.app",
+]
 
 # Application definition
 
